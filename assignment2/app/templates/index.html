@@ -6,21 +6,22 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
       body {
+        background-image: url('https://i.gyazo.com/bc8be7d58f880a5ebb0f0680d30cb6ed.png');
+        background-size: cover; /* Scale the image to cover the entire background */
+        background-repeat: no-repeat; /* Prevent image repetition */
         background-color: pink;
-        color: #ff69b4; /* Change text color to a shade of pink (you can use a different color if you prefer) */
-        font-size: 18px; /* Increase font size to improve visibility */
-        font-weight: bold; /* Make the text bolder */      }
-      #bottom-left-image {
-          position: absolute;
-          bottom: 10px; /* Adjust this value to change the distance from the bottom */
-          left: 10px; /* Adjust this value to change the distance from the left */
-          max-width: 200px; /* Adjust the maximum width as needed */
-          height: auto; /* Maintain the aspect ratio */
-        }
+        color: #ff69b4;
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .container {
+        background-color: rgba(255, 105, 180, 0.5); /* Add a semi-transparent pink background for content */
+        padding: 20px;
+      }
     </style>
   </head>
   <body>
-    <img id="bottom-left-image" src="https://akamai.vgc.no/v2/images/98be17f8-d6d5-4752-82b7-0ffb636dc456?fit=crop&format=auto&h=2022&w=1900&s=6e5157a4071122f2c260030996ddfbbe9fa826e7,tapestry_flatlay_dorm_small,wide_portrait,750x1000.jpg" alt="Bottom Left Image">
     <div class="container mt-5">
       <h1>Helenes Rosa Blogg</h1>
       <form action="/post" method="post">
