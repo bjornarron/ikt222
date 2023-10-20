@@ -90,7 +90,7 @@ index_template = """
       {% endwith %}
       {% for post in posts %}
         <h3>{{ post[1] }}</h3>
-        <p>{{ post[2] }}</p>
+        <p>{{ post[2]| safe }}</p>
         <hr>
       {% endfor %}
     </div>
