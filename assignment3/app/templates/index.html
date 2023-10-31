@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Helenes Rosa Blogg</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+      body {
+        background-image: url('https://i.gyazo.com/bc8be7d58f880a5ebb0f0680d30cb6ed.png');
+        background-size: cover; /* Scale the image to cover the entire background */
+        background-repeat: no-repeat; /* Prevent image repetition */
+        background-color: pink;
+        color: #ff69b4;
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .container {
+        background-color: rgba(255, 105, 180, 0.5); /* Add a semi-transparent pink background for content */
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1>Helenes Rosa Blogg</h1>
+      <form action="/post" method="post">
+        <div class="form-group">
+          <label for="title">Title:</label>
+          <input type="text" class="form-control" id="title" name="title" required>
+        </div>
+        <div class="form-group">
+          <label for="content">Content:</label>
+          <textarea class="form-control" id="content" name="content" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Post</button>
+      </form>
+      <hr>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% for post in posts %}
+      {% autoescape false %}
+        <h3>{{ post[1] | safe}}</h3>
+        <p>{{ post[2] | safe}}</p>
+        <hr>
+        {% endautoescape %}
+      {% endfor %}
+    </div>
+  </body>
+</html>
