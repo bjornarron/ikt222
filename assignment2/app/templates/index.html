@@ -14,11 +14,6 @@
         font-size: 18px;
         font-weight: bold;
       }
-
-      .container {
-        background-color: rgba(255, 105, 180, 0.5); /* Add a semi-transparent pink background for content */
-        padding: 20px;
-      }
     </style>
   </head>
   <body>
@@ -46,11 +41,9 @@
         {% endif %}
       {% endwith %}
       {% for post in posts %}
-      {% autoescape false %}
-        <h3>{{ post[1] | safe}}</h3>
-        <p>{{ post[2] | safe}}</p>
+        <h3>{{ post[1] }}</h3>
+        <p>{{ post[2] }}</p>
         <hr>
-        {% endautoescape %}
       {% endfor %}
     </div>
   </body>
