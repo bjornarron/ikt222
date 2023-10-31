@@ -4,8 +4,8 @@ COPY /app /app
 
 WORKDIR /app
 
-RUN pip install Flask
+RUN pip install Flask bcrypt
 
 EXPOSE 80
 
-CMD ["python", "app.py"]
+CMD ["python", "main.py"]
