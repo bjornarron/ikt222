@@ -5,7 +5,7 @@ app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 app.debug = False
 
-DATABASE = 'site.db'
+DATABASE = 'database/site.db'
 
 @app.route('/')
 def index():

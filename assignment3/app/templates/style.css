@@ -1,0 +1,14 @@
+body {
+    background-image: url('https://i.gyazo.com/bc8be7d58f880a5ebb0f0680d30cb6ed.png');
+    background-size: cover; /* Scale the image to cover the entire background */
+    background-repeat: no-repeat; /* Prevent image repetition */
+    background-color: pink;
+    color: #ff69b4;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.container {
+    background-color: rgba(255, 105, 180, 0.5); /* Add a semi-transparent pink background for content */
+    padding: 20px;
+}
