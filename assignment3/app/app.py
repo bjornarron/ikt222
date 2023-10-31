@@ -8,8 +8,8 @@ app.secret_key = 'supersecretkey'  # In a production app, this should be a more 
 app.debug = False
 
 # Sett inn klient ID og klienthemmelighet
-app.config['GOOGLE_CLIENT_ID'] = 'din_faktiske_google_klient_id'
-app.config['GOOGLE_CLIENT_SECRET'] = 'din_faktiske_google_klient_hemmelighet'
+app.config['GOOGLE_CLIENT_ID'] = '606232351646-2sjtlbnm09n9os7aqamfqi1ce3g6k0rb.apps.googleusercontent.com'
+app.config['GOOGLE_CLIENT_SECRET'] = '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'
 
 # OAuth2 Konfigurasjon
 oauth = OAuth(app)
