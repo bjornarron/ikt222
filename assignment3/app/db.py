@@ -7,16 +7,18 @@ def init_user_db():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
-    # Create a table for users
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY,
         username TEXT NOT NULL UNIQUE,
-        password_hash TEXT NOT NULL
+        password_hash TEXT NOT NULL,
+        attempt_count INTEGER DEFAULT 0,
+        last_attempt_time INTEGER DEFAULT 0
     )
     ''')
     conn.commit()
     conn.close()
+
 
 def hash_password(password: str) -> bytes:
     salt = bcrypt.gensalt()
@@ -41,14 +43,33 @@ def register_user(username: str, password: str) -> bool:
     finally:
         conn.close()
 
-def login_user(username: str, password: str) -> bool:
+def login_user(username: str, password: str) -> str:
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute('SELECT password_hash FROM users WHERE username=?', (username,))
+    cursor.execute('SELECT password_hash, attempt_count, last_attempt_time FROM users WHERE username=?', (username,))
     data = cursor.fetchone()
-    conn.close()
+
     if data:
-        stored_hash = data[0]
-        return check_password(password, stored_hash)
+        stored_hash, attempt_count, last_attempt_time = data
+        current_time = int(time.time())
+
+        if attempt_count >= 3 and current_time - last_attempt_time < 600:
+            conn.close()
+            return "locked_out"
+
+        if bcrypt.checkpw(password.encode('utf-8'), stored_hash):
+            cursor.execute('UPDATE users SET attempt_count = 0 WHERE username=?', (username,))
+            conn.commit()
+            conn.close()
+            return "success"
+        else:
+            new_attempt_count = attempt_count + 1
+            cursor.execute('UPDATE users SET attempt_count = ?, last_attempt_time = ? WHERE username=?', (new_attempt_count, current_time, username))
+            conn.commit()
+            conn.close()
+            return "failed"
     else:
-        return False
+        conn.close()
+        return "failed"
+
+

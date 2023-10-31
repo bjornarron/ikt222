@@ -1,12 +1,36 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import sqlite3
 from db import init_user_db, register_user, login_user
+from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # In a production app, this should be a more secure and hidden key
 app.debug = False
 
+# Sett inn klient ID og klienthemmelighet
+app.config['GOOGLE_CLIENT_ID'] = 'din_faktiske_google_klient_id'
+app.config['GOOGLE_CLIENT_SECRET'] = 'din_faktiske_google_klient_hemmelighet'
+
+# OAuth2 Konfigurasjon
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id=app.config['GOOGLE_CLIENT_ID'],
+    client_secret=app.config['GOOGLE_CLIENT_SECRET'],
+    access_token_url='https://accounts.google.com/o/oauth2/token',
+    access_token_params=None,
+    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    authorize_params=None,
+    api_base_url='https://www.googleapis.com/oauth2/v1/',
+    userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
+    client_kwargs={'scope': 'openid email profile'},
+    jwks_uri='https://www.googleapis.com/oauth2/v3/certs', 
+)
+
+
+
 DATABASE = 'database/site_data.db'
+
 
 def init_db():
     conn = sqlite3.connect(DATABASE)
@@ -27,6 +51,22 @@ def init_db():
     init_user_db()
 
 init_db()
+
+# Legg til OAuth2 Ruter
+@app.route('/login/google')
+def google_login():
+    redirect_uri = url_for('authorize', _external=True)
+    print("Redirect URI:", redirect_uri)  # Denne linjen vil skrive ut den faktiske URL-en
+    return google.authorize_redirect(redirect_uri)
+
+
+@app.route('/authorize')
+def authorize():
+    token = google.authorize_access_token()
+    user_info = google.get('userinfo').json()
+    # Behandle brukerens informasjon her (f.eks. logg inn brukeren)
+    return redirect(url_for('index'))  # Eller en annen passende rute
+
 
 @app.route('/')
 def index():
