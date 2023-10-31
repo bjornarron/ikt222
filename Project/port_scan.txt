@@ -1,0 +1,124 @@
+┌──(andreasel㉿kali)-[~]
+└─$ nmap -sV -sC --script vuln 64.225.76.73
+Starting Nmap 7.94 ( https://nmap.org ) at 2023-10-29 13:14 UTC
+mass_dns: warning: Unable to determine any DNS servers. Reverse DNS is disabled. Try using --system-dns or specify valid servers with --dns-servers
+Nmap scan report for 64.225.76.73
+Host is up (0.013s latency).
+Not shown: 989 closed tcp ports (conn-refused)
+PORT      STATE    SERVICE      VERSION
+22/tcp    open     ssh          OpenSSH 8.9p1 Ubuntu 3ubuntu0.4 (Ubuntu Linux; protocol 2.0)
+25/tcp    filtered smtp
+80/tcp    open     http         Golang net/http server (Go-IPFS json-rpc or InfluxDB API)
+|_http-stored-xss: Couldn't find any stored XSS vulnerabilities.
+|_http-csrf: Couldn't find any CSRF vulnerabilities.
+|_http-dombased-xss: Couldn't find any DOM based XSS.
+|_http-vuln-cve2013-7091: ERROR: Script execution failed (use -d to debug)
+|_http-passwd: ERROR: Script execution failed (use -d to debug)
+443/tcp   open     ssl/http     Golang net/http server (Go-IPFS json-rpc or InfluxDB API)
+|_http-dombased-xss: Couldn't find any DOM based XSS.
+|_http-stored-xss: Couldn't find any stored XSS vulnerabilities.
+|_http-csrf: Couldn't find any CSRF vulnerabilities.
+| http-slowloris-check:
+|   VULNERABLE:
+|   Slowloris DOS attack
+|     State: LIKELY VULNERABLE
+|     IDs:  CVE:CVE-2007-6750
+|       Slowloris tries to keep many connections to the target web server open and hold
+|       them open as long as possible.  It accomplishes this by opening connections to
+|       the target web server and sending a partial request. By doing so, it starves
+|       the http server's resources causing Denial Of Service.
+|
+|     Disclosure date: 2009-09-17
+|     References:
+|       https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2007-6750
+|_      http://ha.ckers.org/slowloris/
+445/tcp   filtered microsoft-ds
+465/tcp   filtered smtps
+2048/tcp  filtered dls-monitor
+2049/tcp  filtered nfs
+4444/tcp  filtered krb524
+5000/tcp  open     upnp?
+| fingerprint-strings:
+|   GetRequest:
+|     HTTP/1.1 200 OK
+|     Server: Werkzeug/3.0.0 Python/3.11.6
+|     Date: Sun, 29 Oct 2023 13:14:55 GMT
+|     Content-Type: text/html; charset=utf-8
+|     Content-Length: 1377
+|     Connection: close
+|     <!DOCTYPE html>
+|     <html lang="en">
+|     <head>
+|     <meta charset="UTF-8">
+|     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+|     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+|     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+|     <style>
+|     body {
+|     background-color: #121212;
+|     color: #f0f0f0;
+|     .card {
+|     background-color: #333;
+|     border: none;
+|     </style>
+|     <title>Dark Web Mission</title>
+|     </head>
+|     <body>
+|     <div class="container mt-5">
+|     <div class="card">
+|     <div class="card-body">
+|     class="card-title">Mission Briefing</h4>
+|     class
+|   RTSPRequest:
+|     <!DOCTYPE HTML>
+|     <html lang="en">
+|     <head>
+|     <meta charset="utf-8">
+|     <title>Error response</title>
+|     </head>
+|     <body>
+|     <h1>Error response</h1>
+|     <p>Error code: 400</p>
+|     <p>Message: Bad request version ('RTSP/1.0').</p>
+|     <p>Error code explanation: 400 - Bad request syntax or unsupported method.</p>
+|     </body>
+|_    </html>
+12345/tcp filtered netbus
+1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
+SF-Port5000-TCP:V=7.94%I=7%D=10/29%Time=653E5ABC%P=x86_64-pc-linux-gnu%r(G
+SF:etRequest,610,"HTTP/1\.1\x20200\x20OK\r\nServer:\x20Werkzeug/3\.0\.0\x2
+SF:0Python/3\.11\.6\r\nDate:\x20Sun,\x2029\x20Oct\x202023\x2013:14:55\x20G
+SF:MT\r\nContent-Type:\x20text/html;\x20charset=utf-8\r\nContent-Length:\x
+SF:201377\r\nConnection:\x20close\r\n\r\n<!DOCTYPE\x20html>\n<html\x20lang
+SF:=\"en\">\n<head>\n\x20\x20\x20\x20<meta\x20charset=\"UTF-8\">\n\x20\x20
+SF:\x20\x20<meta\x20http-equiv=\"X-UA-Compatible\"\x20content=\"IE=edge\">
+SF:\n\x20\x20\x20\x20<meta\x20name=\"viewport\"\x20content=\"width=device-
+SF:width,\x20initial-scale=1\.0\">\n\x20\x20\x20\x20<link\x20href=\"https:
+SF://stackpath\.bootstrapcdn\.com/bootstrap/4\.5\.2/css/bootstrap\.min\.cs
+SF:s\"\x20rel=\"stylesheet\">\n\x20\x20\x20\x20<style>\n\x20\x20\x20\x20\x
+SF:20\x20\x20\x20body\x20{\n\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20background-color:\x20#121212;\n\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20color:\x20#f0f0f0;\n\x20\x20\x20\x20\x20\x20\x20\x20}\n\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\.card\x20{\n\x20\x20\x20\x20\x20\x20\x20\x20
+SF:\x20\x20\x20\x20background-color:\x20#333;\n\x20\x20\x20\x20\x20\x20\x2
+SF:0\x20\x20\x20\x20\x20border:\x20none;\n\x20\x20\x20\x20\x20\x20\x20\x20
+SF:}\n\x20\x20\x20\x20</style>\n\x20\x20\x20\x20<title>Dark\x20Web\x20Miss
+SF:ion</title>\n</head>\n<body>\n<div\x20class=\"container\x20mt-5\">\n\x2
+SF:0\x20\x20\x20<div\x20class=\"card\">\n\x20\x20\x20\x20\x20\x20\x20\x20<
+SF:div\x20class=\"card-body\">\n\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20<h4\x20class=\"card-title\">Mission\x20Briefing</h4>\n\x20\x20\x2
+SF:0\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class")%r(RTSPRequest,16C,"<
+SF:!DOCTYPE\x20HTML>\n<html\x20lang=\"en\">\n\x20\x20\x20\x20<head>\n\x20\
+SF:x20\x20\x20\x20\x20\x20\x20<meta\x20charset=\"utf-8\">\n\x20\x20\x20\x2
+SF:0\x20\x20\x20\x20<title>Error\x20response</title>\n\x20\x20\x20\x20</he
+SF:ad>\n\x20\x20\x20\x20<body>\n\x20\x20\x20\x20\x20\x20\x20\x20<h1>Error\
+SF:x20response</h1>\n\x20\x20\x20\x20\x20\x20\x20\x20<p>Error\x20code:\x20
+SF:400</p>\n\x20\x20\x20\x20\x20\x20\x20\x20<p>Message:\x20Bad\x20request\
+SF:x20version\x20\('RTSP/1\.0'\)\.</p>\n\x20\x20\x20\x20\x20\x20\x20\x20<p
+SF:>Error\x20code\x20explanation:\x20400\x20-\x20Bad\x20request\x20syntax\
+SF:x20or\x20unsupported\x20method\.</p>\n\x20\x20\x20\x20</body>\n</html>\
+SF:n");
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 616.64 seconds
