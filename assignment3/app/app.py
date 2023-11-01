@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import sqlite3
-from db import init_user_db, register_user, login_user
+from auth import generate_secret, generate_qr_code, verify_totp
+from db import init_user_db, register_user, login_user, get_secret_for_user
 from authlib.integrations.flask_client import OAuth
 
 app = Flask(__name__)
@@ -94,25 +95,49 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        if register_user(username, password):
-            flash('Registration successful! Please login.', 'success')
-            return redirect(url_for('login'))
+        secret = generate_secret()  # Generate a secret for TOTP
+        if register_user(username, password, secret):  # Modify the register_user function to accept and save the secret
+            qr_code = generate_qr_code(secret, username)  # Generate a QR code for the user to scan
+            flash('Registration successful! Please scan the QR code with your 2FA app.', 'success')
+            return render_template('register.html', qr_code=qr_code)
         else:
             flash('Registration failed.', 'danger')
-    return render_template('register.html')
+            return render_template('register.html')
+    else:
+        return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        if login_user(username, password):
-            flash('Logged in successfully!', 'success')
-            session['username'] = username
-            return redirect(url_for('index'))
+    try:
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+            totp = request.form.get('totp')  # Retrieve the TOTP provided by the user
+            
+            secret = get_secret_for_user(username)
+            if not secret:
+                flash('Login failed. User not found or no 2FA setup.', 'danger')
+                return render_template('login.html')
+            
+            login_result = login_user(username, password) # Storing the result in a variable for clarity
+
+            if login_result == "success" and verify_totp(totp, secret): # Explicitly check for "success"
+                flash('Logged in successfully!', 'success')
+                session['username'] = username
+                return redirect(url_for('index'))
+            elif login_result == "locked_out":
+                flash('Account locked due to multiple failed attempts. Please try again later.', 'danger')
+                return render_template('login.html')
+            else:
+                flash('Login failed. Check your credentials and 2FA code.', 'danger')
+                return render_template('login.html')
         else:
-            flash('Login failed. Check your credentials.', 'danger')
-    return render_template('login.html')
+            return render_template('login.html')
+    except Exception as e:
+        # Log the error for debugging
+        print(e)
+        flash('An error occurred:  ' + str(e) + '.  Please try again.', 'danger')
+        return render_template('index.html')  
 
 @app.route('/logout')
 def logout():

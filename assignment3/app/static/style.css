@@ -12,3 +12,9 @@ body {
     background-color: rgba(255, 105, 180, 0.5); /* Add a semi-transparent pink background for content */
     padding: 20px;
 }
+
+img.qr-code {
+    width: 150px;
+    height: 150px;
+    margin: 10px 0;
+}

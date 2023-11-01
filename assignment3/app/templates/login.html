@@ -5,10 +5,21 @@
     <title>Log in to Helenes Rosa Blogg</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
   </head>
   <body>
     <div class="container mt-5">
+      
+      <!-- Display Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+              <ul class="list-group mb-3">
+                  {% for category, message in messages %}
+                      <li class="list-group-item list-group-item-{{ category }}">{{ message }}</li>
+                  {% endfor %}
+              </ul>
+          {% endif %}
+      {% endwith %}
+      
       <h2>Login to Helenes Rosa Blogg</h2>
 
       <!-- Logg inn med Google-knapp -->
@@ -26,6 +37,10 @@
         <div class="form-group">
           <label for="password">Password:</label>
           <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+          <label for="totp">Enter 2FA Code:</label>
+          <input type="text" name="totp" required>
         </div>
         <button type="submit" class="btn btn-primary">Log in</button>
       </form>

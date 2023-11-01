@@ -4,7 +4,8 @@ COPY /app /app
 
 WORKDIR /app
 
-RUN pip install Flask bcrypt
+RUN pip install Flask bcrypt authlib requests pyotp qrcode[pil]
+
 
 EXPOSE 80
 

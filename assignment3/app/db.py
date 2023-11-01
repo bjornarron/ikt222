@@ -1,5 +1,6 @@
 import sqlite3
 import bcrypt
+import time
 
 DATABASE = 'database/site_data.db'
 
@@ -12,6 +13,7 @@ def init_user_db():
         id INTEGER PRIMARY KEY,
         username TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
+        secret TEXT NOT NULL,
         attempt_count INTEGER DEFAULT 0,
         last_attempt_time INTEGER DEFAULT 0
     )
@@ -28,20 +30,22 @@ def hash_password(password: str) -> bytes:
 def check_password(password: str, hashed: bytes) -> bool:
     return bcrypt.checkpw(password.encode('utf-8'), hashed)
 
-def register_user(username: str, password: str) -> bool:
-    conn = sqlite3.connect(DATABASE)
+def register_user(username: str, password: str, secret: str) -> bool:
+    conn = sqlite3.connect(DATABASE)  # Initiate the connection
     cursor = conn.cursor()
     try:
         hashed_password = hash_password(password)
-        cursor.execute('INSERT INTO users (username, password_hash) VALUES (?, ?)', (username, hashed_password))
+        cursor.execute(
+            'INSERT INTO users (username, password_hash, secret) VALUES (?, ?, ?)', 
+            (username, hashed_password, secret)
+        )
         conn.commit()
+        conn.close()
         return True
     except sqlite3.IntegrityError:
-        # This error occurs if the username is already taken
         print("Username already exists!")
-        return False
-    finally:
         conn.close()
+        return False
 
 def login_user(username: str, password: str) -> str:
     conn = sqlite3.connect(DATABASE)
@@ -72,4 +76,16 @@ def login_user(username: str, password: str) -> str:
         conn.close()
         return "failed"
 
-
+def get_secret_for_user(username: str) -> str:
+    conn = sqlite3.connect(DATABASE)
+    try:
+        with sqlite3.connect(DATABASE) as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT secret FROM users WHERE username=?', (username,))
+            data = cursor.fetchone()
+            if data:
+                return data[0]
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+    return None
+    
