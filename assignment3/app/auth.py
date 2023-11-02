@@ -1,6 +1,5 @@
 import pyotp
 import qrcode
-import time
 from io import BytesIO
 from base64 import b64encode
 

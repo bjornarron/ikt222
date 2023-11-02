@@ -66,11 +66,14 @@ def authorize():
     token = google.authorize_access_token()
     user_info = google.get('userinfo').json()
     # Behandle brukerens informasjon her (f.eks. logg inn brukeren)
-    return redirect(url_for('index'))  # Eller en annen passende rute
+    return redirect(url_for('loggedin'))  # Eller en annen passende rute
 
 
 @app.route('/')
 def index():
+    if 'username' in session:
+        # If user is logged in, redirect to loggedin page
+        return redirect(url_for('loggedin'))
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM posts ORDER BY id DESC')
@@ -78,17 +81,37 @@ def index():
     conn.close()
     return render_template('index.html', posts=posts)
 
+@app.route('/loggedin')
+def loggedin():
+    if 'username' not in session:
+        # If user is not logged in, redirect to index page
+        return redirect(url_for('index'))
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM posts ORDER BY id DESC')
+    posts = cursor.fetchall()
+    conn.close()
+
+    return render_template('loggedin.html', posts=posts)
+
 @app.route('/post', methods=['POST'])
 def post():
+    if 'username' not in session:
+        # If user is not logged in, redirect to index page
+        flash('You need to be logged in to post!', 'danger')
+        return redirect(url_for('index'))
+
     title = request.form['title']
     content = request.form['content']
+
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute('INSERT INTO posts (title, content) VALUES (?, ?)', (title, content))
     conn.commit()
     conn.close()
+
     flash('Post added successfully!', 'success')
-    return redirect(url_for('index'))
+    return redirect(url_for('loggedin'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -124,7 +147,7 @@ def login():
             if login_result == "success" and verify_totp(totp, secret): # Explicitly check for "success"
                 flash('Logged in successfully!', 'success')
                 session['username'] = username
-                return redirect(url_for('index'))
+                return redirect(url_for('loggedin'))
             elif login_result == "locked_out":
                 flash('Account locked due to multiple failed attempts. Please try again later.', 'danger')
                 return render_template('login.html')
