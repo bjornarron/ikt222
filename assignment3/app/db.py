@@ -1,7 +1,28 @@
 import sqlite3
 import bcrypt
 import time
+import sqlite3
 
+from auth import get_user_email
+
+from cryptography.fernet import Fernet
+key = Fernet.generate_key()
+with open('secret.key', 'wb') as key_file:
+    key_file.write(key)
+
+def load_key():
+    with open('secret.key', 'rb') as key_file:
+        return key_file.read()
+
+# Legger til opprettelse av Fernet-nøkkelen
+cipher_suite = Fernet(load_key())
+
+def encrypt_token(token):
+    return cipher_suite.encrypt(token.encode())
+
+def decrypt_token(encrypted_token):
+    return cipher_suite.decrypt(encrypted_token).decode()
+ 
 DATABASE = 'database/site_data.db'
 
 def init_user_db():
@@ -20,7 +41,6 @@ def init_user_db():
     ''')
     conn.commit()
     conn.close()
-
 
 def hash_password(password: str) -> bytes:
     salt = bcrypt.gensalt()
@@ -88,4 +108,77 @@ def get_secret_for_user(username: str) -> str:
     except sqlite3.Error as e:
         print(f"Database error: {e}")
     return None
-    
+
+
+
+# Her følger de oppdaterte funksjonene med kryptering
+
+
+def get_oauth_tokens(email):
+    conn = sqlite3.connect('database/google_account.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT access_token, refresh_token, token_expires FROM oauth_tokens WHERE email = ?', (email,))
+    data = cursor.fetchone()
+    conn.close()
+
+    if data:
+        encrypted_access_token, encrypted_refresh_token, token_expires = data
+        access_token = decrypt_token(encrypted_access_token)
+        refresh_token = decrypt_token(encrypted_refresh_token)
+        return access_token, refresh_token, token_expires
+    return None
+
+def update_access_token(email, new_access_token, new_expires):
+    conn = sqlite3.connect('database/google_account.db')
+    cursor = conn.cursor()
+    encrypted_access_token = encrypt_token(new_access_token)
+
+    cursor.execute('''
+        UPDATE oauth_tokens
+        SET access_token = ?, token_expires = ?
+        WHERE email = ?;
+    ''', (encrypted_access_token, new_expires, email))
+    conn.commit()
+    conn.close()
+
+
+#tabell for google account
+def init_google_account_db():
+    conn = sqlite3.connect('database/google_account.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS oauth_tokens (
+        email TEXT PRIMARY KEY,
+        access_token TEXT,
+        refresh_token TEXT,
+        token_expires TIMESTAMP
+    )
+    ''')
+    conn.commit()
+    conn.close()
+
+def save_oauth_tokens(email, access_token, refresh_token, token_expires):
+    conn = sqlite3.connect('database/google_account.db')
+    cursor = conn.cursor()
+
+    encrypted_access_token = encrypt_token(access_token)
+    encrypted_refresh_token = encrypt_token(refresh_token) if refresh_token is not None else None
+
+    cursor.execute('''
+        INSERT INTO oauth_tokens (email, access_token, refresh_token, token_expires) 
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(email) DO UPDATE SET 
+        access_token = excluded.access_token,
+        refresh_token = excluded.refresh_token,
+        token_expires = excluded.token_expires;
+    ''', (email, encrypted_access_token, encrypted_refresh_token, token_expires))
+    conn.commit()
+    conn.close()
+
+
+
+# Kall funksjonen for å initialisere Google Account databasen
+init_google_account_db()
+
+

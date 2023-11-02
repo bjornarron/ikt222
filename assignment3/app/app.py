@@ -3,6 +3,8 @@ import sqlite3
 from auth import generate_secret, generate_qr_code, verify_totp
 from db import init_user_db, register_user, login_user, get_secret_for_user
 from authlib.integrations.flask_client import OAuth
+from db import save_oauth_tokens
+
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # In a production app, this should be a more secure and hidden key
@@ -61,12 +63,38 @@ def google_login():
     return google.authorize_redirect(redirect_uri)
 
 
-@app.route('/authorize')
+""" @app.route('/authorize')
 def authorize():
     token = google.authorize_access_token()
     user_info = google.get('userinfo').json()
     # Behandle brukerens informasjon her (f.eks. logg inn brukeren)
     return redirect(url_for('index'))  # Eller en annen passende rute
+
+ """
+@app.route('/authorize')
+def authorize():
+    token = google.authorize_access_token()
+    user_info = google.get('userinfo').json()
+
+    email = user_info.get('email')
+    if email:
+        # Lagre brukerens e-post og OAuth-tokens i databasen
+        access_token = token.get('access_token')
+        refresh_token = token.get('refresh_token')
+        expires_in = token.get('expires_in')  # Beregn utløpstidspunktet
+        
+        # Sjekk om brukeren allerede finnes i databasen
+        if not get_secret_for_user(email):
+            # Registrer brukeren i databasen hvis de ikke finnes
+            secret = generate_secret()  # Generer et hemmelig nøkkel for 2FA
+            register_user(email, '', secret)  # Her kan du vurdere å lagre et dummy-passord eller tilpasse funksjonen
+
+        # Oppdater OAuth-tokens i databasen
+        save_oauth_tokens(email, access_token, refresh_token, expires_in)
+
+    # Logg inn brukeren og omdiriger til en passende side
+    session['username'] = email
+    return redirect(url_for('index'))
 
 
 @app.route('/')
