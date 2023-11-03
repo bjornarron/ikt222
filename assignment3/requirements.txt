@@ -1,2 +1,6 @@
 Flask
 bcrypt
+authlib
+requests
+pyotp
+qrcode[pil]
