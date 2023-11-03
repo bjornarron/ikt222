@@ -65,9 +65,28 @@ def google_login():
 def authorize():
     token = google.authorize_access_token()
     user_info = google.get('userinfo').json()
-    # Behandle brukerens informasjon her (f.eks. logg inn brukeren)
-    return redirect(url_for('loggedin'))  # Eller en annen passende rute
+    email = user_info.get('email')
 
+    # Connect to the SQLite database
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+
+    # Check if the user already exists in the database
+    cursor.execute('SELECT id FROM users WHERE username=?', (email,))
+    user = cursor.fetchone()
+
+    # If the user doesn't exist, insert the new user into the database
+    if not user:
+        cursor.execute('''
+        INSERT INTO users (username, password_hash, secret)
+        VALUES (?, '', '')
+        ''', (email,))
+
+        conn.commit()
+
+    conn.close()
+    session['username'] = email
+    return redirect(url_for('loggedin'))  # Or another appropriate route
 
 @app.route('/')
 def index():

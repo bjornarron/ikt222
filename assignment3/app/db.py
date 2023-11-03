@@ -18,6 +18,8 @@ def init_user_db():
         last_attempt_time INTEGER DEFAULT 0
     )
     ''')
+    
+    
     conn.commit()
     conn.close()
 
